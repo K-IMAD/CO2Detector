@@ -3,13 +3,13 @@
 #include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 #include <time.h>
- #include <ArduinoJson.h> // Commented out - we'll create JSON manually
- #include <LiquidCrystal_I2C.h> // Commented out - LCD functionality disabled
+#include <ArduinoJson.h> // Commented out - we'll create JSON manually
+#include <LiquidCrystal_I2C.h> // Commented out - LCD functionality disabled
 #include <HardwareSerial.h>
 
 // WiFi credentials
-const char* ssid = "ALHN-6208";
-const char* wifi_pass = "juventus+1897";
+const char* ssid = "Nafas";
+const char* wifi_pass = "26022001";
 
 // MQTT settings
 const char* mqtt_host = "495e05bee6cb40cd97eeb41fc597850e.s1.eu.hivemq.cloud";
@@ -24,11 +24,6 @@ HardwareSerial sensor1(1); // Use UART1
 HardwareSerial sensor2(2); // Use UART2
 
 byte cmd_get_sensor[] = {0xFF, 0x01, 0x86, 0, 0, 0, 0, 0, 0x79};
-
-// LED pins for ESP32
-int greenLED = 25;
-int yellowLED = 26;
-int redLED = 27;
 
 // MQTT and WiFi clients
 WiFiClientSecure net;
@@ -154,14 +149,6 @@ void reconnectMQTT() {
   }
 }
 
-void updateLEDs(int co2_1, int co2_2) {
-  // Get the highest CO2 reading for LED status
-  int maxCO2 = max(co2_1, co2_2);
-  
-  // Turn off all LEDs first
-  digitalWrite(greenLED, LOW);
-  digitalWrite(yellowLED, LOW);
-  digitalWrite(redLED, LOW);
   
   if (maxCO2 < 0) {
     // Error state - blink red
@@ -191,22 +178,6 @@ void setup() {
   // Initialize sensors with specific pins for ESP32
   sensor1.begin(9600, SERIAL_8N1, 16, 17); // RX=16, TX=17
   sensor2.begin(9600, SERIAL_8N1, 4, 2);   // RX=4, TX=2
-
-  // Initialize LEDs
-  pinMode(greenLED, OUTPUT);
-  pinMode(yellowLED, OUTPUT);
-  pinMode(redLED, OUTPUT);
-  
-  // Test LEDs
-  digitalWrite(greenLED, HIGH);
-  delay(200);
-  digitalWrite(greenLED, LOW);
-  digitalWrite(yellowLED, HIGH);
-  delay(200);
-  digitalWrite(yellowLED, LOW);
-  digitalWrite(redLED, HIGH);
-  delay(200);
-  digitalWrite(redLED, LOW);
 
   // WAIT for sensors to warm up
   Serial.println("Warming up sensors...");
@@ -289,9 +260,6 @@ void loop() {
      } else {
        lcd.print("S2: Error");
      }
-
-    // Update LED indicators
-    updateLEDs(co2_1, co2_2);
 
     // Publish to MQTT if connected
     if (mqttClient.connected()) {
